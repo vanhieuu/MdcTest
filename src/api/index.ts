@@ -8,7 +8,8 @@ export const apiOnGetData = (page: number) =>
 
 export const onSetToken = async (key: string, value: any) => {
   try {
-    await AsyncStorage.setItem(key, value);
+    const jsonValue = JSON.stringify(value)
+    await AsyncStorage.setItem(key, jsonValue);
   } catch (e) {
     console.error(e);
   }
@@ -16,10 +17,9 @@ export const onSetToken = async (key: string, value: any) => {
 
 export const onGetToken = async (key: string) => {
   try {
-    const value = await AsyncStorage.getItem(key);
-    if (value !== null) {
-      return value
-    }
+    const jsonValue = await AsyncStorage.getItem(key);
+    return jsonValue != null ? JSON.parse(jsonValue) : null;
+    
   } catch (e) {
     // error reading value
   }

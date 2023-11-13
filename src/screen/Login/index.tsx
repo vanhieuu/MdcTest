@@ -1,29 +1,43 @@
-import {StyleSheet, View, TouchableOpacity} from 'react-native';
+import {StyleSheet, View, TouchableOpacity, Alert} from 'react-native';
 import React from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Text} from '../../component/text';
 import {FormLoginType} from './components/input';
 import {FormLogin} from './components/form-login';
-import {apiLogin} from '../../api';
+import {apiLogin, onGetToken, onSetToken} from '../../api';
 import {AppTheme, useTheme} from '../../themes';
 import {useDispatch} from 'react-redux';
 import {appActions} from '../../store/appReducer';
 const LoginScreen = () => {
-  const [isCheck, setIsCheck] = React.useState<boolean>(false);
+  const [isCheck, setIsCheck] = React.useState<boolean>(true);
   const theme = useTheme();
   const dispatch = useDispatch();
 
   const onSubmit = React.useCallback(async (data: FormLoginType) => {
-    console.log(data, 'data');
     const result = await apiLogin(data.name, data.password);
-    dispatch(appActions.onSetProfile(result));
-    dispatch(appActions.onSetLoginToken(result.result));
-
-    if (isCheck) {
+    console.log(result,'res')
+    if (result.result === 1) {
+      dispatch(appActions.onSetProfile(result));
       dispatch(appActions.onSetLoginToken(result.result));
+
+      if (isCheck === true) {
+        dispatch(appActions.onSetLoginToken(result.result));
+       await onSetToken('loginInfor', data);
+      }
+    } else {
+      Alert.alert('Tên đăng nhập hoặc mật khẩu không chính xác');
     }
+
     console.log(result, 'res');
   }, []);
+
+  React.useEffect(() => {
+    const onGetData = async () => {
+       await onGetToken('loginInfor').then(res => onSubmit(res));
+      // console.log(res, 'JsonValue');
+    };
+    onGetData();
+  }, [isCheck]);
 
   const onPressAutoLogin = () => {
     console.log(isCheck);
